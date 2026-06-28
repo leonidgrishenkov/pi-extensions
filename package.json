@@ -1,0 +1,12 @@
+{
+  "name": "pi-extensions",
+  "version": "1.0.0",
+  "description": "Personal pi coding agent extensions, themes, and prompts",
+  "keywords": ["pi-package"],
+  "private": true,
+  "pi": {
+    "extensions": ["./extensions"],
+    "themes": ["./themes"],
+    "prompts": ["./prompts"]
+  }
+}
