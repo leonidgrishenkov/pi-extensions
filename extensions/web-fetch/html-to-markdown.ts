@@ -20,7 +20,9 @@ function getService(): TurndownService {
 		emDelimiter: "*",
 	});
 	// Strip noise that pollutes LLM context: scripts, stylesheets, nav metadata.
-	service.remove(["script", "style", "noscript", "meta", "link", "svg", "picture"]);
+	service.remove(["script", "style", "noscript", "meta", "link", "svg", "picture"] as unknown as Parameters<
+		TurndownService["remove"]
+	>[0]);
 	return service;
 }
 

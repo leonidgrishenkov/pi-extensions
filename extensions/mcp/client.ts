@@ -16,13 +16,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import {
-	type ServerEntry,
-	interpolate,
-	resolveBearerToken,
-	resolveEnv,
-	resolveHeaders,
-} from "./config.ts";
+import { type ServerEntry, interpolate, resolveBearerToken, resolveEnv, resolveHeaders } from "./config.ts";
 
 export interface McpToolMeta {
 	name: string;
@@ -30,9 +24,7 @@ export interface McpToolMeta {
 	inputSchema?: Record<string, unknown>;
 }
 
-export type ContentBlock =
-	| { type: "text"; text: string }
-	| { type: "image"; data: string; mimeType: string };
+export type ContentBlock = { type: "text"; text: string } | { type: "image"; data: string; mimeType: string };
 
 type Closable = { close(): Promise<void> };
 
@@ -134,16 +126,16 @@ export class McpServerManager {
 		throw new Error(`Server "${name}" has neither command nor url`);
 	}
 
-	async callTool(
-		name: string,
-		tool: string,
-		args: Record<string, unknown>,
-	): Promise<CallToolResult> {
+	async callTool(name: string, tool: string, args: Record<string, unknown>): Promise<CallToolResult> {
 		const conn = this.connections.get(name);
 		if (!conn || conn.status !== "connected") {
 			throw new Error(`Server "${name}" is not connected`);
 		}
-		return conn.client.callTool({ name: tool, arguments: args });
+		const result = await conn.client.callTool({ name: tool, arguments: args });
+		// The SDK returns a union of the classic `content`-based result and the
+		// newer task-based `toolResult` shape. Downstream code uses `result.content ?? []`,
+		// so the task-based shape is handled gracefully as empty content.
+		return result as CallToolResult;
 	}
 
 	async close(name: string): Promise<void> {

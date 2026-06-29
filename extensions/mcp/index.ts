@@ -15,19 +15,11 @@
  * See README.md for the server entry shape.
  */
 
-import type {
-	AgentToolResult,
-	ExtensionAPI,
-	ExtensionContext,
-} from "@earendil-works/pi-coding-agent";
+import type { AgentToolResult, ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import type { AutocompleteItem } from "@earendil-works/pi-tui";
 import { loadConfig, type LoadedConfig, type ServerEntry } from "./config.ts";
-import {
-	McpServerManager,
-	transformContent,
-	type McpToolMeta,
-} from "./client.ts";
+import { McpServerManager, transformContent, type McpToolMeta } from "./client.ts";
 
 interface State {
 	config: LoadedConfig;
@@ -75,9 +67,7 @@ export default function mcpExtension(pi: ExtensionAPI) {
 			"Use mcp to access external tools provided by MCP servers. Search before calling if unsure of the exact tool name.",
 		],
 		parameters: Type.Object({
-			tool: Type.Optional(
-				Type.String({ description: "Tool name to call" }),
-			),
+			tool: Type.Optional(Type.String({ description: "Tool name to call" })),
 			args: Type.Optional(
 				Type.Record(Type.String(), Type.Any(), {
 					description: 'Arguments object for the tool, e.g. {"query": "..."}',
@@ -93,17 +83,13 @@ export default function mcpExtension(pi: ExtensionAPI) {
 					description: "Substring to search for in tool names and descriptions across all servers",
 				}),
 			),
-			status: Type.Optional(
-				Type.Boolean({ description: "Show MCP server and tool status" }),
-			),
+			status: Type.Optional(Type.Boolean({ description: "Show MCP server and tool status" })),
 		}),
 		async execute(_id, params, _signal, _onUpdate, ctx) {
 			if (!state) return err("MCP not initialized.");
 			const { config, manager } = state;
 
-			const wantStatus =
-				params.status === true ||
-				(!params.tool && !params.search && !params.server);
+			const wantStatus = params.status === true || (!params.tool && !params.search && !params.server);
 
 			if (wantStatus) return statusResult(config, manager);
 			if (params.search) return await searchResult(config, manager, params.search);
@@ -121,9 +107,7 @@ export default function mcpExtension(pi: ExtensionAPI) {
 		description: "MCP servers: status, reconnect, tools",
 		getArgumentCompletions(prefix: string): AutocompleteItem[] | null {
 			const subs = ["status", "reconnect", "tools"];
-			const items = subs
-				.filter((s) => s.startsWith(prefix))
-				.map((s) => ({ value: s, label: s }));
+			const items = subs.filter((s) => s.startsWith(prefix)).map((s) => ({ value: s, label: s }));
 			return items.length > 0 ? items : null;
 		},
 		handler: async (args, ctx) => {
@@ -142,10 +126,7 @@ export default function mcpExtension(pi: ExtensionAPI) {
 				await manager.close(server);
 				try {
 					await manager.connect(server, config.mcpServers[server]);
-					ctx.ui?.notify(
-						`✓ Reconnected to ${server} (${manager.getTools(server).length} tools)`,
-						"info",
-					);
+					ctx.ui?.notify(`✓ Reconnected to ${server} (${manager.getTools(server).length} tools)`, "info");
 				} catch (e) {
 					ctx.ui?.notify(`✗ ${server}: ${msg(e)}`, "error");
 				}
@@ -165,10 +146,7 @@ export default function mcpExtension(pi: ExtensionAPI) {
 					}
 				}
 				const tools = manager.getTools(server);
-				const lines = [
-					`${server} (${tools.length} tools):`,
-					...tools.map((t) => `  ${t.name}`),
-				];
+				const lines = [`${server} (${tools.length} tools):`, ...tools.map((t) => `  ${t.name}`)];
 				ctx.ui?.notify(lines.join("\n"), "info");
 				refreshStatus(ctx);
 				return;
@@ -228,9 +206,7 @@ function statusText(config: LoadedConfig, manager: McpServerManager): string {
 function statusResult(config: LoadedConfig, manager: McpServerManager): Result {
 	const names = Object.keys(config.mcpServers);
 	if (names.length === 0) {
-		return ok(
-			"No MCP servers configured. Add servers to ~/.pi/agent/mcp.json or .mcp.json (project).",
-		);
+		return ok("No MCP servers configured. Add servers to ~/.pi/agent/mcp.json or .mcp.json (project).");
 	}
 	let text = `MCP: ${names.length} server(s)\n\n`;
 	for (const name of names) {
@@ -241,7 +217,7 @@ function statusResult(config: LoadedConfig, manager: McpServerManager): Result {
 		text += `${icon} ${name}${toolNote}\n`;
 	}
 	text +=
-		"\nUse mcp({ search: \"...\" }) to find tools, mcp({ server: \"name\" }) to list a server's tools, mcp({ tool: \"name\", args: {...} }) to call.";
+		'\nUse mcp({ search: "..." }) to find tools, mcp({ server: "name" }) to list a server\'s tools, mcp({ tool: "name", args: {...} }) to call.';
 	return ok(text);
 }
 
@@ -258,11 +234,7 @@ async function ensureAllConnected(config: LoadedConfig, manager: McpServerManage
 	);
 }
 
-async function searchResult(
-	config: LoadedConfig,
-	manager: McpServerManager,
-	query: string,
-): Promise<Result> {
+async function searchResult(config: LoadedConfig, manager: McpServerManager, query: string): Promise<Result> {
 	const q = query.toLowerCase();
 	await ensureAllConnected(config, manager);
 
@@ -287,11 +259,7 @@ async function searchResult(
 	return ok(text);
 }
 
-async function listResult(
-	config: LoadedConfig,
-	manager: McpServerManager,
-	server: string,
-): Promise<Result> {
+async function listResult(config: LoadedConfig, manager: McpServerManager, server: string): Promise<Result> {
 	if (!config.mcpServers[server]) return err(`Server "${server}" not configured.`);
 	if (manager.getStatus(server) !== "connected") {
 		try {
@@ -363,14 +331,10 @@ async function callResult(
 			}
 		}
 		if (candidates.length === 0) {
-			return err(
-				`Tool "${toolName}" not found on any server. Use mcp({ search: "..." }) to find tools.`,
-			);
+			return err(`Tool "${toolName}" not found on any server. Use mcp({ search: "..." }) to find tools.`);
 		}
 		if (candidates.length > 1) {
-			return err(
-				`Tool "${toolName}" exists on multiple servers: ${candidates.join(", ")}. Specify server.`,
-			);
+			return err(`Tool "${toolName}" exists on multiple servers: ${candidates.join(", ")}. Specify server.`);
 		}
 		serverName = candidates[0];
 	}
@@ -400,10 +364,7 @@ async function callResult(
 
 // ---- command helpers -------------------------------------------------------
 
-async function pickServer(
-	config: LoadedConfig,
-	ctx: ExtensionContext,
-): Promise<string | undefined> {
+async function pickServer(config: LoadedConfig, ctx: ExtensionContext): Promise<string | undefined> {
 	const names = Object.keys(config.mcpServers);
 	if (names.length === 0) {
 		ctx.ui?.notify("No MCP servers configured.", "info");

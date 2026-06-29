@@ -63,27 +63,19 @@ export async function checkRepoSize(owner: string, repo: string): Promise<number
 	if (!(await checkGhAuthenticated())) return null;
 
 	return new Promise((resolve) => {
-		execFile(
-			"gh",
-			["api", `repos/${owner}/${repo}`, "--jq", ".size"],
-			{ timeout: 10_000 },
-			(err, stdout) => {
-				if (err) {
-					resolve(null);
-					return;
-				}
-				const kb = parseInt(stdout.trim(), 10);
-				resolve(Number.isNaN(kb) ? null : kb);
-			},
-		);
+		execFile("gh", ["api", `repos/${owner}/${repo}`, "--jq", ".size"], { timeout: 10_000 }, (err, stdout) => {
+			if (err) {
+				resolve(null);
+				return;
+			}
+			const kb = parseInt(stdout.trim(), 10);
+			resolve(Number.isNaN(kb) ? null : kb);
+		});
 	});
 }
 
 /** Return the repository's default branch name, or `null`. */
-export async function getDefaultBranch(
-	owner: string,
-	repo: string,
-): Promise<string | null> {
+export async function getDefaultBranch(owner: string, repo: string): Promise<string | null> {
 	if (!(await checkGhAuthenticated())) return null;
 
 	return new Promise((resolve) => {
@@ -108,22 +100,13 @@ export async function getDefaultBranch(
 // ---------------------------------------------------------------------------
 
 /** Fetch the recursive file tree as a newline-separated list of paths. */
-async function fetchTreeViaApi(
-	owner: string,
-	repo: string,
-	ref: string,
-): Promise<string | null> {
+async function fetchTreeViaApi(owner: string, repo: string, ref: string): Promise<string | null> {
 	if (!(await checkGhAuthenticated())) return null;
 
 	return new Promise((resolve) => {
 		execFile(
 			"gh",
-			[
-				"api",
-				`repos/${owner}/${repo}/git/trees/${ref}?recursive=1`,
-				"--jq",
-				".tree[].path",
-			],
+			["api", `repos/${owner}/${repo}/git/trees/${ref}?recursive=1`, "--jq", ".tree[].path"],
 			{ timeout: 15_000, maxBuffer: 5 * 1024 * 1024 },
 			(err, stdout) => {
 				if (err) {
@@ -137,33 +120,20 @@ async function fetchTreeViaApi(
 				}
 				const truncated = paths.length > MAX_TREE_ENTRIES;
 				const display = paths.slice(0, MAX_TREE_ENTRIES).join("\n");
-				resolve(
-					truncated
-						? `${display}\n... (${paths.length} total entries)`
-						: display,
-				);
+				resolve(truncated ? `${display}\n... (${paths.length} total entries)` : display);
 			},
 		);
 	});
 }
 
 /** Fetch the repository README (decoded from base64), truncated to a safe size. */
-async function fetchReadmeViaApi(
-	owner: string,
-	repo: string,
-	ref: string,
-): Promise<string | null> {
+async function fetchReadmeViaApi(owner: string, repo: string, ref: string): Promise<string | null> {
 	if (!(await checkGhAuthenticated())) return null;
 
 	return new Promise((resolve) => {
 		execFile(
 			"gh",
-			[
-				"api",
-				`repos/${owner}/${repo}/readme?ref=${ref}`,
-				"--jq",
-				".content",
-			],
+			["api", `repos/${owner}/${repo}/readme?ref=${ref}`, "--jq", ".content"],
 			{ timeout: 10_000 },
 			(err, stdout) => {
 				if (err) {
@@ -171,13 +141,10 @@ async function fetchReadmeViaApi(
 					return;
 				}
 				try {
-					const decoded = Buffer.from(stdout.trim(), "base64").toString(
-						"utf-8",
-					);
+					const decoded = Buffer.from(stdout.trim(), "base64").toString("utf-8");
 					resolve(
 						decoded.length > MAX_README_CHARS
-							? decoded.slice(0, MAX_README_CHARS) +
-								"\n\n[README truncated at 8K chars]"
+							? decoded.slice(0, MAX_README_CHARS) + "\n\n[README truncated at 8K chars]"
 							: decoded,
 					);
 				} catch {
@@ -189,23 +156,13 @@ async function fetchReadmeViaApi(
 }
 
 /** Fetch a single file's content (decoded from base64). */
-async function fetchFileViaApi(
-	owner: string,
-	repo: string,
-	path: string,
-	ref: string,
-): Promise<string | null> {
+async function fetchFileViaApi(owner: string, repo: string, path: string, ref: string): Promise<string | null> {
 	if (!(await checkGhAuthenticated())) return null;
 
 	return new Promise((resolve) => {
 		execFile(
 			"gh",
-			[
-				"api",
-				`repos/${owner}/${repo}/contents/${path}?ref=${ref}`,
-				"--jq",
-				".content",
-			],
+			["api", `repos/${owner}/${repo}/contents/${path}?ref=${ref}`, "--jq", ".content"],
 			{ timeout: 10_000, maxBuffer: 2 * 1024 * 1024 },
 			(err, stdout) => {
 				if (err) {
@@ -268,10 +225,7 @@ export async function fetchViaApi(
 	}
 
 	// -- Repo overview (tree + README) --------------------------------------
-	const [tree, readme] = await Promise.all([
-		fetchTreeViaApi(owner, repo, ref),
-		fetchReadmeViaApi(owner, repo, ref),
-	]);
+	const [tree, readme] = await Promise.all([fetchTreeViaApi(owner, repo, ref), fetchReadmeViaApi(owner, repo, ref)]);
 
 	if (!tree && !readme) return null;
 
@@ -287,9 +241,7 @@ export async function fetchViaApi(
 		lines.push("");
 	}
 
-	lines.push(
-		"This is an API-only view. Clone the repo or use `read`/`bash` for deeper exploration.",
-	);
+	lines.push("This is an API-only view. Clone the repo or use `read`/`bash` for deeper exploration.");
 
 	return lines.join("\n");
 }

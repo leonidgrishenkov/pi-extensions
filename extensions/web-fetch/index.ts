@@ -65,7 +65,10 @@ const webFetchTool = defineTool({
 		"If a fetch returns a cross-host redirect notice, re-issue the request with the final URL to obtain the actual content.",
 	],
 	parameters: Type.Object({
-		url: Type.String({ description: "The URL to fetch content from. Must start with http:// or https://. GitHub URLs (github.com/owner/repo/blob/..., /tree/...) are handled with structured extraction." }),
+		url: Type.String({
+			description:
+				"The URL to fetch content from. Must start with http:// or https://. GitHub URLs (github.com/owner/repo/blob/..., /tree/...) are handled with structured extraction.",
+		}),
 		format: Type.Optional(
 			Type.Union([Type.Literal("markdown"), Type.Literal("text"), Type.Literal("html")], {
 				description:
@@ -75,7 +78,8 @@ const webFetchTool = defineTool({
 		),
 		forceClone: Type.Optional(
 			Type.Boolean({
-				description: "For GitHub URLs: force a full shallow clone even when the repo exceeds the size threshold.",
+				description:
+					"For GitHub URLs: force a full shallow clone even when the repo exceeds the size threshold.",
 				default: false,
 			}),
 		),
@@ -88,20 +92,14 @@ const webFetchTool = defineTool({
 			// -- GitHub URLs get structured extraction (clone or API) --------
 			const isGitHub = /^https?:\/\/(www\.)?github\.com\//i.test(params.url);
 
-			const result = isGitHub
-				? await fetchGitHubUrl(params.url, signal, params.forceClone)
-				: null;
+			const result = isGitHub ? await fetchGitHubUrl(params.url, signal, params.forceClone) : null;
 
 			// -- GitHub extractor returned content ----------------------------
 			if (result) {
 				const text = formatResultForLLM(result, format);
 				// Parse owner/repo from details for the renderer.
-				const repoMatch = params.url.match(
-					/github\.com\/([^/]+)\/([^/?#]+)/i,
-				);
-				const pathMatch = params.url.match(
-					/github\.com\/[^/]+\/[^/]+\/(?:blob|tree)\/[^/]+\/(.+)/,
-				);
+				const repoMatch = params.url.match(/github\.com\/([^/]+)\/([^/?#]+)/i);
+				const pathMatch = params.url.match(/github\.com\/[^/]+\/[^/]+\/(?:blob|tree)\/[^/]+\/(.+)/);
 
 				return {
 					content: [{ type: "text", text }],
@@ -114,7 +112,7 @@ const webFetchTool = defineTool({
 									path: pathMatch?.[1],
 								}
 							: undefined,
-					} satisfies WebFetchDetails,
+					} as WebFetchDetails,
 					isError: false,
 				};
 			}
@@ -130,7 +128,7 @@ const webFetchTool = defineTool({
 
 			return {
 				content: [{ type: "text", text }],
-				details: { result: httpResult } satisfies WebFetchDetails,
+				details: { result: httpResult, githubRepo: undefined } as WebFetchDetails,
 				isError: false,
 			};
 		} catch (err) {
@@ -139,7 +137,7 @@ const webFetchTool = defineTool({
 
 			return {
 				content: [{ type: "text", text: `Error: ${message}` }],
-				details: { error: message } satisfies WebFetchDetails,
+				details: { result: undefined, githubRepo: undefined, error: message } as WebFetchDetails,
 				isError: !isAbort,
 			};
 		}
@@ -159,10 +157,7 @@ const webFetchTool = defineTool({
 
 		if (!details || details.error) {
 			return new Text(
-				[
-					theme.fg("muted", label),
-					theme.fg("error", details?.error ?? "Web fetch failed"),
-				].join("\n"),
+				[theme.fg("muted", label), theme.fg("error", details?.error ?? "Web fetch failed")].join("\n"),
 				0,
 				0,
 			);
@@ -180,10 +175,9 @@ const webFetchTool = defineTool({
 			lines.push(theme.fg("muted", `(redirected from ${r.originalUrl})`));
 		}
 
-		const sizeLabel = r.content.length >= 1024
-			? `${(r.content.length / 1024).toFixed(1)} KB`
-			: `${r.content.length} B`;
-		const typeLabel = details.githubRepo ? "git" : (r.contentType || "unknown type");
+		const sizeLabel =
+			r.content.length >= 1024 ? `${(r.content.length / 1024).toFixed(1)} KB` : `${r.content.length} B`;
+		const typeLabel = details.githubRepo ? "git" : r.contentType || "unknown type";
 		lines.push(theme.fg("muted", `${typeLabel} · ${sizeLabel}`));
 		return new Text(lines.join("\n"), 0, 0);
 	},

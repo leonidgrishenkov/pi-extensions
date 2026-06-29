@@ -16,10 +16,7 @@ const execFileAsync = promisify(execFile);
  * Resolve an API key from the given credential source.
  * Returns undefined when no key is available.
  */
-export async function resolveKey(
-	source: CredentialSource,
-	signal?: AbortSignal,
-): Promise<string | undefined> {
+export async function resolveKey(source: CredentialSource, signal?: AbortSignal): Promise<string | undefined> {
 	// 1) command takes priority — when present, env vars are ignored entirely
 	if (source.command) {
 		try {
@@ -33,7 +30,7 @@ export async function resolveKey(
 	}
 
 	// 2) No command — fall back to env vars
-	for (const name of source.envVars ) {
+	for (const name of source.envVars) {
 		const v = process.env[name];
 		if (v) return v;
 	}

@@ -46,9 +46,7 @@ function readJson(path: string): Record<string, unknown> | null {
 	if (!existsSync(path)) return null;
 	try {
 		const raw = JSON.parse(readFileSync(path, "utf-8"));
-		return raw && typeof raw === "object" && !Array.isArray(raw)
-			? (raw as Record<string, unknown>)
-			: null;
+		return raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : null;
 	} catch (err) {
 		console.warn(`mcp: failed to parse ${path}: ${err}`);
 		return null;
@@ -68,11 +66,7 @@ function extractServers(raw: Record<string, unknown>): Record<string, ServerEntr
  *   3. <cwd>/.pi/mcp.json          (project, Pi override)
  */
 export function loadConfig(cwd: string): LoadedConfig {
-	const candidates = [
-		join(agentDir(), "mcp.json"),
-		resolve(cwd, ".mcp.json"),
-		resolve(cwd, ".pi", "mcp.json"),
-	];
+	const candidates = [join(agentDir(), "mcp.json"), resolve(cwd, ".mcp.json"), resolve(cwd, ".pi", "mcp.json")];
 
 	const sources: string[] = [];
 	let merged: Record<string, ServerEntry> = {};

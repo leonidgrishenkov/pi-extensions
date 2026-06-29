@@ -38,11 +38,7 @@ import { fetchRemoteUrl, validateRemoteUrl } from "./ssrf-protection.ts";
  */
 function normalizeUrl(raw: string): URL {
 	if (!/^https?:\/\//i.test(raw)) {
-		throw new FetchError(
-			`Invalid URL: "${raw}"`,
-			undefined,
-			"The URL must start with http:// or https://.",
-		);
+		throw new FetchError(`Invalid URL: "${raw}"`, undefined, "The URL must start with http:// or https://.");
 	}
 	return new URL(raw.replace(/^http:\/\//i, "https://"));
 }
@@ -137,10 +133,7 @@ function isCloudflareChallenge(res: Response): boolean {
  */
 export async function fetchUrl(params: FetchParams): Promise<FetchResult> {
 	const { format, signal } = params;
-	const timeout = Math.min(
-		(params.timeout ?? DEFAULT_TIMEOUT_MS / 1000) * 1000,
-		MAX_TIMEOUT_MS,
-	);
+	const timeout = Math.min((params.timeout ?? DEFAULT_TIMEOUT_MS / 1000) * 1000, MAX_TIMEOUT_MS);
 	const maxBytes = params.maxBytes ?? MAX_BYTES;
 
 	// -- Validate & normalize URL -------------------------------------------
@@ -210,8 +203,11 @@ export async function fetchUrl(params: FetchParams): Promise<FetchResult> {
 		const body = await response.text().catch(() => "");
 		const status = response.status;
 		let hint: string | undefined;
-		if (status === 403) hint = "Access was denied. Try web_search tool to locate an alternative source, or check if the URL requires authentication.";
-		if (status === 404) hint = "Page not found. Verify the URL or try web_search tool to locate the correct resource.";
+		if (status === 403)
+			hint =
+				"Access was denied. Try web_search tool to locate an alternative source, or check if the URL requires authentication.";
+		if (status === 404)
+			hint = "Page not found. Verify the URL or try web_search tool to locate the correct resource.";
 		if (status === 429) hint = "Rate limited. Retry after the period indicated by Retry-After header.";
 		if (status >= 500) hint = "Server error. Try again in a moment or check the service status page.";
 		throw new FetchError(

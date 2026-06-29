@@ -14,6 +14,7 @@ import { exaProvider } from "./providers/exa.ts";
 import { perplexityProvider } from "./providers/perplexity.ts";
 import { tavilyProvider } from "./providers/tavily.ts";
 import {
+	type Provider,
 	type ProviderName,
 	type SearchParams,
 	type SearchResponse,

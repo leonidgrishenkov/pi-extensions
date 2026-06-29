@@ -64,11 +64,7 @@ export function clamp(n: number, lo: number, hi: number): number {
 }
 
 /** Shared JSON fetch helper that normalizes errors into SearchProviderError. */
-export async function fetchJson(
-	provider: ProviderName,
-	url: string,
-	init: RequestInit,
-): Promise<unknown> {
+export async function fetchJson(provider: ProviderName, url: string, init: RequestInit): Promise<unknown> {
 	let res: Response;
 	try {
 		res = await fetch(url, init);

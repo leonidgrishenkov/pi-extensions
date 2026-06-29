@@ -30,12 +30,7 @@ import {
 import { execFile } from "node:child_process";
 import { extname, join, resolve as resolvePath, sep as pathSep } from "node:path";
 import type { FetchResult, GitHubCloneConfig, GitHubUrlInfo } from "./types.ts";
-import {
-	DEFAULT_GITHUB_CONFIG,
-	MAX_TREE_ENTRIES,
-	MAX_INLINE_FILE_CHARS,
-	MAX_README_CHARS,
-} from "./types.ts";
+import { DEFAULT_GITHUB_CONFIG, MAX_TREE_ENTRIES, MAX_INLINE_FILE_CHARS, MAX_README_CHARS } from "./types.ts";
 import { fetchViaApi, checkGhAuthenticated, checkRepoSize } from "./github-api.ts";
 
 // ---------------------------------------------------------------------------
@@ -84,16 +79,67 @@ const NON_CODE_SEGMENTS = new Set([
 // ---------------------------------------------------------------------------
 
 const BINARY_EXTENSIONS = new Set([
-	".png", ".jpg", ".jpeg", ".gif", ".bmp", ".ico", ".webp", ".svg", ".tiff", ".tif",
-	".mp3", ".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".wav", ".ogg", ".webm",
-	".flac", ".aac",
-	".zip", ".tar", ".gz", ".bz2", ".xz", ".7z", ".rar", ".zst",
-	".exe", ".dll", ".so", ".dylib", ".bin", ".o", ".a", ".lib",
-	".woff", ".woff2", ".ttf", ".otf", ".eot",
-	".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
-	".sqlite", ".db", ".sqlite3",
-	".pyc", ".pyo", ".class", ".jar", ".war",
-	".iso", ".img", ".dmg",
+	".png",
+	".jpg",
+	".jpeg",
+	".gif",
+	".bmp",
+	".ico",
+	".webp",
+	".svg",
+	".tiff",
+	".tif",
+	".mp3",
+	".mp4",
+	".avi",
+	".mov",
+	".mkv",
+	".flv",
+	".wmv",
+	".wav",
+	".ogg",
+	".webm",
+	".flac",
+	".aac",
+	".zip",
+	".tar",
+	".gz",
+	".bz2",
+	".xz",
+	".7z",
+	".rar",
+	".zst",
+	".exe",
+	".dll",
+	".so",
+	".dylib",
+	".bin",
+	".o",
+	".a",
+	".lib",
+	".woff",
+	".woff2",
+	".ttf",
+	".otf",
+	".eot",
+	".pdf",
+	".doc",
+	".docx",
+	".xls",
+	".xlsx",
+	".ppt",
+	".pptx",
+	".sqlite",
+	".db",
+	".sqlite3",
+	".pyc",
+	".pyo",
+	".class",
+	".jar",
+	".war",
+	".iso",
+	".img",
+	".dmg",
 ]);
 
 /** Directories to skip when building a file tree (build artefacts, caches). */
@@ -191,12 +237,7 @@ function getGitHubConfig() {
 
 let cachedCloneCache: Map<string, string | null> = new Map();
 
-function cloneDir(
-	config: GitHubCloneConfig,
-	owner: string,
-	repo: string,
-	ref?: string,
-): string {
+function cloneDir(config: GitHubCloneConfig, owner: string, repo: string, ref?: string): string {
 	const dirName = ref ? `${repo}@${ref}` : repo;
 	return join(config.clonePath, owner, dirName);
 }
@@ -227,17 +268,7 @@ async function cloneRepo(
 	const hasGh = await checkGhAuthenticated();
 
 	if (hasGh) {
-		const args = [
-			"gh",
-			"repo",
-			"clone",
-			`${owner}/${repo}`,
-			localPath,
-			"--",
-			"--depth",
-			"1",
-			"--single-branch",
-		];
+		const args = ["gh", "repo", "clone", `${owner}/${repo}`, localPath, "--", "--depth", "1", "--single-branch"];
 		if (ref) args.push("--branch", ref);
 		return execGitCommand(args, localPath, timeoutMs, signal);
 	}
@@ -326,9 +357,7 @@ function resolveWithinRepo(rootPath: string, relativePath: string): string | nul
 	const candidate = resolvePath(normalizedRoot, relativePath);
 
 	if (candidate !== normalizedRoot) {
-		const rootPrefix = normalizedRoot.endsWith(pathSep)
-			? normalizedRoot
-			: normalizedRoot + pathSep;
+		const rootPrefix = normalizedRoot.endsWith(pathSep) ? normalizedRoot : normalizedRoot + pathSep;
 		if (!candidate.startsWith(rootPrefix)) return null;
 	}
 
@@ -338,9 +367,7 @@ function resolveWithinRepo(rootPath: string, relativePath: string): string | nul
 		const realRoot = realpathSync(normalizedRoot);
 		const realCandidate = realpathSync(candidate);
 		if (realCandidate === realRoot) return candidate;
-		const realRootPrefix = realRoot.endsWith(pathSep)
-			? realRoot
-			: realRoot + pathSep;
+		const realRootPrefix = realRoot.endsWith(pathSep) ? realRoot : realRoot + pathSep;
 		return realCandidate.startsWith(realRootPrefix) ? candidate : null;
 	} catch {
 		return null;
@@ -424,11 +451,7 @@ function buildDirListing(rootPath: string, subPath: string): string {
 		}
 		try {
 			const stat = statSync(safePath);
-			lines.push(
-				stat.isDirectory()
-					? `  ${item}/`
-					: `  ${item}  (${formatFileSize(stat.size)})`,
-			);
+			lines.push(stat.isDirectory() ? `  ${item}/` : `  ${item}  (${formatFileSize(stat.size)})`);
 		} catch {
 			lines.push(`  ${item}  (unreadable)`);
 		}
@@ -439,13 +462,7 @@ function buildDirListing(rootPath: string, subPath: string): string {
 
 /** Read a README file from the repo root (tries several common names). */
 function readReadme(localPath: string): string | null {
-	const candidates = [
-		"README.md",
-		"readme.md",
-		"README",
-		"README.txt",
-		"README.rst",
-	];
+	const candidates = ["README.md", "readme.md", "README", "README.txt", "README.rst"];
 	for (const name of candidates) {
 		const readmePath = join(localPath, name);
 		if (existsSync(readmePath)) {
@@ -623,9 +640,7 @@ export async function fetchGitHubUrl(
 		const cachedPath = cachedCloneCache.get(cacheKey)!;
 		if (cachedPath && existsSync(cachedPath)) {
 			const content = generateContent(cachedPath, info);
-			const title = info.path
-				? `${owner}/${repo} — ${info.path}`
-				: `${owner}/${repo}`;
+			const title = info.path ? `${owner}/${repo} — ${info.path}` : `${owner}/${repo}`;
 			return buildResult(url, title, content);
 		}
 		// Cached path was deleted — stale entry, fall through.
@@ -637,9 +652,7 @@ export async function fetchGitHubUrl(
 		const sizeNote = "Note: Commit SHA URLs use the GitHub API instead of cloning.";
 		const apiContent = await fetchViaApi(url, owner, repo, info, sizeNote);
 		if (apiContent) {
-			const title = info.path
-				? `${owner}/${repo} — ${info.path}`
-				: `${owner}/${repo}`;
+			const title = info.path ? `${owner}/${repo} — ${info.path}` : `${owner}/${repo}`;
 			return buildResult(url, title, apiContent);
 		}
 		return null;
@@ -662,9 +675,7 @@ export async function fetchGitHubUrl(
 
 				const apiContent = await fetchViaApi(url, owner, repo, info, sizeNote);
 				if (apiContent) {
-					const title = info.path
-						? `${owner}/${repo} — ${info.path}`
-						: `${owner}/${repo}`;
+					const title = info.path ? `${owner}/${repo} — ${info.path}` : `${owner}/${repo}`;
 					return buildResult(url, title, apiContent);
 				}
 
@@ -682,18 +693,14 @@ export async function fetchGitHubUrl(
 	if (localPath) {
 		cachedCloneCache.set(cacheKey, localPath);
 		const content = generateContent(localPath, info);
-		const title = info.path
-			? `${owner}/${repo} — ${info.path}`
-			: `${owner}/${repo}`;
+		const title = info.path ? `${owner}/${repo} — ${info.path}` : `${owner}/${repo}`;
 		return buildResult(url, title, content);
 	}
 
 	// -- Clone failed → final API fallback ----------------------------------
 	const apiContent = await fetchViaApi(url, owner, repo, info);
 	if (apiContent) {
-		const title = info.path
-			? `${owner}/${repo} — ${info.path}`
-			: `${owner}/${repo}`;
+		const title = info.path ? `${owner}/${repo} — ${info.path}` : `${owner}/${repo}`;
 		return buildResult(url, title, apiContent);
 	}
 
@@ -706,11 +713,7 @@ export async function fetchGitHubUrl(
 // ---------------------------------------------------------------------------
 
 /** Construct a `FetchResult`-shaped object for GitHub content. */
-function buildResult(
-	url: string,
-	_title: string,
-	content: string,
-): FetchResult {
+function buildResult(url: string, _title: string, content: string): FetchResult {
 	return {
 		url,
 		originalUrl: url,

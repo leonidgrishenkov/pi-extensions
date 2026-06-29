@@ -7,7 +7,7 @@ description: Review staged git changes, create a commit message and commit
 ## Workflow
 
 - Review the staged changes (`git diff --cached`) and create a commit message based on them.
-Use Conventional Commits Message style. Keep it short and descriptive.
+  Use Conventional Commits Message style. Keep it short and descriptive.
 - Commit changes with picked commit message. (e.g. `git commit -m "feat: add new feature"`)
 
 ## Rules
