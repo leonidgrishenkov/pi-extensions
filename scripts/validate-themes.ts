@@ -50,9 +50,7 @@ async function main(): Promise<void> {
 				const schemaData = await res.json();
 				compiledSchemas.set(schemaUrl, globalAjv.compile(schemaData));
 			} catch (err) {
-				console.error(
-					`✗ Could not fetch schema (${(err as Error).message}), skipping validation.`,
-				);
+				console.error(`✗ Could not fetch schema (${(err as Error).message}), skipping validation.`);
 				compiledSchemas.set(schemaUrl, null);
 			}
 		}
@@ -79,7 +77,7 @@ async function main(): Promise<void> {
 		console.error(`\n${failures} validation error(s)`);
 		process.exit(1);
 	}
-	
+
 	console.log(`\nAll ${files.length} theme(s) passed schema validation.`);
 }
 
