@@ -11,8 +11,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci:
-    name: CI Pipeline
+  # ─────────────────────────────────────────────────
+  # 1. Quality gate
+  # ─────────────────────────────────────────────────
+  check:
+    name: Type Check & Lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -25,8 +28,79 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Run all checks consecutively (fail fast)
-        run: npm run ci
+      - name: TypeScript type check
+        run: npm run typecheck
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Prettier (check formatting)
+        run: npm run format:check
+
+  # ─────────────────────────────────────────────────
+  # 2. Tests (Waits for Quality gate)
+  # ─────────────────────────────────────────────────
+  test:
+    name: Test
+    needs: check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  # ─────────────────────────────────────────────────
+  # 3. Structural validation (Waits for Tests)
+  # ─────────────────────────────────────────────────
+  validate:
+    name: Validate Themes & Markdown
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Validate theme JSON files
+        run: npm run validate:themes
+
+      - name: Lint Markdown prompts
+        run: npm run lint:md
+
+  # ─────────────────────────────────────────────────
+  # 4. Security audit (Waits for Validation)
+  # ─────────────────────────────────────────────────
+  audit:
+    name: Dependency Audit
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Audit production dependencies (strict)
+        run: npm run audit:prod
+
+      - name: Audit all dependencies (standard)
+        run: npm run audit:all
