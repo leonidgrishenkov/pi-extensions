@@ -96,5 +96,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: Audit dependencies (high and above)
-        run: npm audit --audit-level=high
+      - name: Audit production dependencies (strict)
+        run: npm run audit:prod
+
+      - name: Audit all dependencies (standard)
+        run: npm run audit:all
