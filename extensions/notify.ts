@@ -38,7 +38,7 @@ function notifyWindows(title: string, body: string): void {
 	execFile("powershell.exe", ["-NoProfile", "-Command", windowsToastScript(title, body)]);
 }
 
-function notify(title: string, body: string): void {
+export function notify(title: string, body: string): void {
 	if (process.env.WT_SESSION) {
 		notifyWindows(title, body);
 	} else if (process.env.KITTY_WINDOW_ID) {

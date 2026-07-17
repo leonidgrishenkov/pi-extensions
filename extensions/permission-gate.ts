@@ -2,9 +2,11 @@
  * Permission Gate Extension
  *
  * Prompts for confirmation before running potentially dangerous bash commands.
+ * Sends cross-platform notifications so you never miss a gate.
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { notify } from "./notify";
 
 const DANGEROUS_PATTERNS = [/\brm\s+(-rf?|--recursive)/i, /\bsudo\b/i, /\b(chmod|chown)\b.*777/i];
 
@@ -16,6 +18,10 @@ export default function (pi: ExtensionAPI) {
 		const isDangerous = DANGEROUS_PATTERNS.some((p) => p.test(command));
 
 		if (isDangerous) {
+			// Notify user immediately so they don't miss it
+			const title = "⚠️ Pi Permission Gate";
+			notify(title, `Dangerous command detected: ${command}`);
+
 			if (!ctx.hasUI) {
 				// In non-interactive mode, block by default
 				return { block: true, reason: "Dangerous command blocked (no UI for confirmation)" };
