@@ -8,13 +8,14 @@ version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
-    assignees: &assignees
+    assignees:
       - leonidgrishenkov
     schedule:
       interval: "weekly"
 
   - package-ecosystem: "github-actions" # See documentation for possible values
     directory: "/" # Location of package manifests
-    assignees: *assignees
+    assignees:
+      - leonidgrishenkov
     schedule:
       interval: "weekly"
