@@ -2,6 +2,8 @@
 
 Personal [pi coding agent](https://pi.dev) extensions, themes, and prompt templates.
 
+<img width="3358" height="2194" alt="20260718110925@2x" src="https://github.com/user-attachments/assets/cd34b14c-6e9e-4c87-b168-22010def0236" />
+
 ## Install
 
 ```sh
