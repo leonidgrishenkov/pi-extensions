@@ -43,7 +43,8 @@
   },
   "overrides": {
     "@earendil-works/pi-tui": "0.79.10",
-    "@earendil-works/pi-ai": "0.79.10"
+    "@earendil-works/pi-ai": "0.79.10",
+    "fast-uri": "^3.1.4"
   },
   "pi": {
     "extensions": [
