@@ -24,7 +24,7 @@
     "turndown": "7.2.4"
   },
   "devDependencies": {
-    "@earendil-works/pi-ai": "0.79.10",
+    "@earendil-works/pi-ai": "0.81.1",
     "@earendil-works/pi-coding-agent": "0.79.10",
     "@earendil-works/pi-tui": "0.79.10",
     "@types/turndown": "5.0.5",
@@ -43,7 +43,7 @@
   },
   "overrides": {
     "@earendil-works/pi-tui": "0.79.10",
-    "@earendil-works/pi-ai": "0.79.10",
+    "@earendil-works/pi-ai": "0.81.1",
     "fast-uri": "^3.1.4",
     "@hono/node-server": "^2.0.5"
   },
