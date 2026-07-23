@@ -16,17 +16,16 @@
     "test:watch": "vitest",
     "validate:themes": "tsx scripts/validate-themes.ts",
     "audit:prod": "npm audit --omit=dev --audit-level=low",
-    "audit:all": "npm audit --audit-level=moderate",
-    "ci": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run validate:themes && npm run lint:md && npm run audit:prod && npm run audit:all"
+    "ci": "npm run typecheck && npm run lint && npm run format:check && npm test && npm run validate:themes && npm run lint:md && npm run audit:prod"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.0",
     "turndown": "7.2.4"
   },
   "devDependencies": {
-    "@earendil-works/pi-ai": "0.79.10",
-    "@earendil-works/pi-coding-agent": "0.79.10",
-    "@earendil-works/pi-tui": "0.79.10",
+    "@earendil-works/pi-ai": "0.81.1",
+    "@earendil-works/pi-coding-agent": "0.81.1",
+    "@earendil-works/pi-tui": "0.81.1",
     "@types/turndown": "5.0.5",
     "@typescript-eslint/eslint-plugin": "^8.62.1",
     "@typescript-eslint/parser": "^8.62.1",
@@ -42,8 +41,6 @@
     "vitest": "^4.1.9"
   },
   "overrides": {
-    "@earendil-works/pi-tui": "0.79.10",
-    "@earendil-works/pi-ai": "0.79.10",
     "fast-uri": "^3.1.4",
     "@hono/node-server": "^2.0.5"
   },

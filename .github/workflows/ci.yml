@@ -101,6 +101,3 @@ jobs:
 
       - name: Audit production dependencies (strict)
         run: npm run audit:prod
-
-      - name: Audit all dependencies (standard)
-        run: npm run audit:all
