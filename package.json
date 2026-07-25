@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@earendil-works/pi-ai": "0.81.1",
-    "@earendil-works/pi-coding-agent": "0.81.1",
+    "@earendil-works/pi-coding-agent": "0.82.0",
     "@earendil-works/pi-tui": "0.81.1",
     "@types/turndown": "5.0.5",
     "@typescript-eslint/eslint-plugin": "^8.62.1",
